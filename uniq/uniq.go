@@ -6,12 +6,12 @@ import (
 )
 
 type Options struct {
-	C bool // подсчитать количество встречаний строки во входных данных
-	D bool // вывести только те строки, которые повторились во входных данных.
-	U bool // вывести только те строки, которые не повторились во входных данных.
-	F int  // не учитывать первые num_fields полей в строке.
-	S int  // не учитывать первые num_chars символов в строке
-	I bool // не учитывать регистр букв
+	CountEntries   bool // подсчитать количество встречаний строки во входных данных
+	OnlyRepeating  bool // вывести только те строки, которые повторились во входных данных.
+	OnlyUnique     bool // вывести только те строки, которые не повторились во входных данных.
+	IgnoreFields   int  // не учитывать первые num_fields полей в строке.
+	IgnoreChars    int  // не учитывать первые num_chars символов в строке
+	IgnoreRegister bool // не учитывать регистр букв
 }
 
 type line struct {
@@ -32,17 +32,21 @@ func (r repLine) getModified() string {
 	return r.line.modified
 }
 
+func (r repLine) isUniq() bool {
+	return r.count == 1
+}
+
 // функция применяет опции к строке, не меняя ее, возвращает копию
 func useOptions(line string, options Options) string {
 	// C, D, U - в процессе работы функции применяются
 	var result = line
-	if options.F > 0 {
-		result = strings.Join(strings.Split(result, " ")[options.F:], " ")
+	if options.IgnoreFields > 0 {
+		result = strings.Join(strings.Split(result, " ")[options.IgnoreFields:], " ")
 	}
-	if options.S > 0 {
-		result = result[options.S:]
+	if options.IgnoreChars > 0 {
+		result = result[options.IgnoreChars:]
 	}
-	if options.I {
+	if options.IgnoreRegister {
 		result = strings.ToLower(line)
 	}
 	return result
@@ -75,18 +79,18 @@ func Uniq(options Options, input []string) []string {
 	lines := createLines(options, input)
 	repLines := findReplicates(lines)
 	for _, repLine := range repLines {
-		if options.C {
+		if options.CountEntries {
 			result = append(result, strconv.Itoa(int(repLine.count))+" "+repLine.getOrigin())
 			continue
 		}
-		if options.D {
-			if repLine.count > 1 {
+		if options.OnlyRepeating {
+			if !repLine.isUniq() {
 				result = append(result, repLine.getOrigin())
 			}
 			continue
 		}
-		if options.U {
-			if repLine.count == 1 {
+		if options.OnlyUnique {
+			if repLine.isUniq() {
 				result = append(result, repLine.getOrigin())
 			}
 		}

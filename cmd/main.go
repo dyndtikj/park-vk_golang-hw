@@ -23,8 +23,8 @@ func readLines(reader io.Reader) ([]string, error) {
 
 func main() {
 	var opts uniq.Options
-	opts.U = true
-	opts.I = true
+	opts.OnlyRepeating = true
+	opts.IgnoreRegister = true
 	// debug
 	file, err := os.Open("./test_cases/test1.txt")
 	if err != nil {
