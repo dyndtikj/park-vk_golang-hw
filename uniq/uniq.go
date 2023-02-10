@@ -14,14 +14,15 @@ type Options struct {
 	IgnoreRegister bool // не учитывать регистр букв
 }
 
+// структура описывает одну строку, необходима для дальнейшей обрпботки
 type line struct {
-	origin   string
-	modified string
+	origin   string // сама оригинальная строка
+	modified string // строка после применения опций
 }
 
 type repLine struct {
-	line  line
-	count uint
+	line  line //информация о строке (оригнальная и после применения опций)
+	count uint //количество данных строк
 }
 
 func (r repLine) getOrigin() string {
@@ -38,7 +39,6 @@ func (r repLine) isUniq() bool {
 
 // функция применяет опции к строке, не меняя ее, возвращает копию
 func useOptions(line string, options Options) string {
-	// C, D, U - в процессе работы функции применяются
 	var result = line
 	if options.IgnoreFields > 0 {
 		result = strings.Join(strings.Split(result, " ")[options.IgnoreFields:], " ")
