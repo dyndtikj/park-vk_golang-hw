@@ -40,9 +40,8 @@ func (r repLine) isUniq() bool {
 
 func (o Options) IsValid() bool {
 	return o.IgnoreChars >= 0 && o.IgnoreFields >= 0 &&
-		((o.OnlyUnique && !(o.OnlyRepeating || o.CountEntries)) ||
-			(o.OnlyRepeating && !(o.OnlyUnique || o.CountEntries)) ||
-			(o.CountEntries && !(o.OnlyRepeating || o.OnlyUnique)))
+		(!o.OnlyUnique && !o.OnlyRepeating ||
+			(!o.CountEntries && ((o.OnlyRepeating && !o.OnlyUnique) || (!o.OnlyRepeating && o.OnlyUnique))))
 }
 
 // функция применяет опции к строке, не меняя ее, возвращает копию
