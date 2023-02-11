@@ -39,12 +39,13 @@ func (r repLine) isUniq() bool {
 }
 
 func (o Options) IsValid() bool {
+	//вспомнили дискретку
 	return o.IgnoreChars >= 0 && o.IgnoreFields >= 0 &&
 		(!o.OnlyUnique && !o.OnlyRepeating ||
 			(!o.CountEntries && ((o.OnlyRepeating && !o.OnlyUnique) || (!o.OnlyRepeating && o.OnlyUnique))))
 }
 
-// функция применяет опции к строке, не меняя ее, возвращает копию
+// Функция применяет опции к строке, не меняя ее, возвращает копию
 func useOptions(line string, options Options) string {
 	var result = line
 	if options.IgnoreFields > 0 {
