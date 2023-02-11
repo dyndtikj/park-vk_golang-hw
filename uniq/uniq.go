@@ -46,25 +46,46 @@ func (o Options) IsValid() bool {
 }
 
 // Функция применяет опции к строке, не меняя ее, возвращает копию
-func useOptions(line string, options Options) string {
-	var result = line
+func useOptions(line string, options Options) (result string, err error) {
+	result = line
 	if options.IgnoreFields > 0 {
-		result = strings.Join(strings.Split(result, " ")[options.IgnoreFields:], " ")
+		str := strings.Split(result, " ")
+		if len(str) < options.IgnoreFields {
+			return result, errors.New("Str:\"" + line + "\" dont have " +
+				strconv.Itoa(options.IgnoreFields) + " fields")
+		}
+		result = strings.Join(str[options.IgnoreFields:], " ")
 	}
 	if options.IgnoreChars > 0 {
-		result = result[options.IgnoreChars:]
+		if options.IgnoreFields > 0 {
+			// При использовании вместе с параметром -f учитываются первые символы после num_fields полей
+			// (не учитывая пробел-разделитель после последнего поля).
+			if options.IgnoreChars > len(result) {
+				return result, errors.New("Str:\"" + line + "\" dont have " +
+					strconv.Itoa(options.IgnoreChars) + " letters after applying ignore " +
+					strconv.Itoa(options.IgnoreFields) + " fields option")
+			}
+			result = result[:options.IgnoreChars]
+		} else {
+			result = result[options.IgnoreChars:]
+		}
 	}
 	if options.IgnoreRegister {
-		result = strings.ToLower(line)
+		result = strings.ToLower(result)
 	}
-	return result
+	return
 }
 
-func createLines(options Options, input []string) (result []line) {
+func createLines(options Options, input []string) (result []line, err error) {
 	for _, str := range input {
-		result = append(result, line{str, useOptions(str, options)})
+		var modified string
+		modified, err = useOptions(str, options)
+		if err != nil {
+			return
+		}
+		result = append(result, line{str, modified})
 	}
-	return result
+	return
 }
 
 func findReplicates(input []line) []repLine {
@@ -82,27 +103,33 @@ func findReplicates(input []line) []repLine {
 	return dupLines
 }
 
-func Uniq(options Options, input []string) ([]string, error) {
-	result := make([]string, 0)
+func Uniq(options Options, input []string) (result []string, err error) {
 	if !options.IsValid() {
 		return result, errors.New("invalid arguments")
 	}
-	lines := createLines(options, input)
+	lines, err := createLines(options, input)
+	if err != nil {
+		return
+	}
 	repLines := findReplicates(lines)
 	for _, repLine := range repLines {
+		var outStr string
 		if options.CountEntries {
-			result = append(result, strconv.Itoa(int(repLine.count))+" "+repLine.getOrigin())
-			continue
-		} else if options.OnlyRepeating {
+			outStr += strconv.Itoa(int(repLine.count)) + " "
+		}
+		outStr += repLine.getOrigin()
+		if options.OnlyRepeating {
 			if !repLine.isUniq() {
-				result = append(result, repLine.getOrigin())
+				result = append(result, outStr)
 			}
 			continue
 		} else if options.OnlyUnique {
 			if repLine.isUniq() {
-				result = append(result, repLine.getOrigin())
+				result = append(result, outStr)
 			}
+			continue
 		}
+		result = append(result, outStr)
 	}
 	return result, nil
 }

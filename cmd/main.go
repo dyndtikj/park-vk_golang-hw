@@ -91,6 +91,7 @@ func main() {
 		fmt.Println(correctOpts)
 		return
 	}
+
 	lines, err := readData(settings)
 	if err != nil {
 		log.Fatal(err)
