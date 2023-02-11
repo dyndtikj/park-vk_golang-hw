@@ -27,7 +27,7 @@ jobs:
         run: |
           go version
           sudo apt install golint -y
-          go mod download
+          go get ./...
 
       - name: Run build
         run: |
