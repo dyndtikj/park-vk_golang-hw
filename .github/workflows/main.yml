@@ -9,7 +9,7 @@ on:
       - '!master'
   pull_request:
     branches:
-      - master
+      - 'master'
 
 jobs:
   build:
@@ -36,6 +36,7 @@ jobs:
       # Run vet & lint on the code
       - name: Run vet & lint
         run: |
+          cd cmd/
           go vet .
           golint .
 
