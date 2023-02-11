@@ -42,7 +42,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	output := uniq.Uniq(opts, lines)
+	output, err := uniq.Uniq(opts, lines)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	for _, str := range output {
 		fmt.Println(str)
 	}

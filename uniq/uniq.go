@@ -1,6 +1,7 @@
 package uniq
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 )
@@ -35,6 +36,13 @@ func (r repLine) getModified() string {
 
 func (r repLine) isUniq() bool {
 	return r.count == 1
+}
+
+func (o Options) isValid() bool {
+	return o.IgnoreChars >= 0 && o.IgnoreFields >= 0 &&
+		((o.OnlyUnique && !(o.OnlyRepeating || o.CountEntries)) ||
+			(o.OnlyRepeating && !(o.OnlyUnique || o.CountEntries)) ||
+			(o.CountEntries && !(o.OnlyRepeating || o.OnlyUnique)))
 }
 
 // функция применяет опции к строке, не меняя ее, возвращает копию
@@ -74,26 +82,27 @@ func findReplicates(input []line) []repLine {
 	return dupLines
 }
 
-func Uniq(options Options, input []string) []string {
+func Uniq(options Options, input []string) ([]string, error) {
 	result := make([]string, 0)
+	if !options.isValid() {
+		return result, errors.New("invalid arguments")
+	}
 	lines := createLines(options, input)
 	repLines := findReplicates(lines)
 	for _, repLine := range repLines {
 		if options.CountEntries {
 			result = append(result, strconv.Itoa(int(repLine.count))+" "+repLine.getOrigin())
 			continue
-		}
-		if options.OnlyRepeating {
+		} else if options.OnlyRepeating {
 			if !repLine.isUniq() {
 				result = append(result, repLine.getOrigin())
 			}
 			continue
-		}
-		if options.OnlyUnique {
+		} else if options.OnlyUnique {
 			if repLine.isUniq() {
 				result = append(result, repLine.getOrigin())
 			}
 		}
 	}
-	return result
+	return result, nil
 }
