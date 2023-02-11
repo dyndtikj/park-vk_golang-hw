@@ -38,7 +38,7 @@ func (r repLine) isUniq() bool {
 	return r.count == 1
 }
 
-func (o Options) isValid() bool {
+func (o Options) IsValid() bool {
 	return o.IgnoreChars >= 0 && o.IgnoreFields >= 0 &&
 		((o.OnlyUnique && !(o.OnlyRepeating || o.CountEntries)) ||
 			(o.OnlyRepeating && !(o.OnlyUnique || o.CountEntries)) ||
@@ -84,7 +84,7 @@ func findReplicates(input []line) []repLine {
 
 func Uniq(options Options, input []string) ([]string, error) {
 	result := make([]string, 0)
-	if !options.isValid() {
+	if !options.IsValid() {
 		return result, errors.New("invalid arguments")
 	}
 	lines := createLines(options, input)

@@ -10,6 +10,8 @@ import (
 	"uniq_util/uniq"
 )
 
+const correctOpts = "go run main.go [-c | -d | -u] [-i] [-f num] [-s chars] [input_file [output_file]]"
+
 func parseCmd() (options uniq.Options) {
 	flag.BoolVar(&options.CountEntries, "c", false, "подсчитать количество встречаний строки во входных данных")
 	flag.BoolVar(&options.OnlyRepeating, "d", false, "вывести только те строки, которые повторились во входных данных.")
@@ -35,6 +37,11 @@ func readLines(reader io.Reader) ([]string, error) {
 
 func main() {
 	opts := parseCmd()
+	if !opts.IsValid() {
+		fmt.Println("invalid arguments, usage:")
+		fmt.Println(correctOpts)
+		return
+	}
 	// debug
 	file, err := os.Open("./test_cases/test1.txt")
 	if err != nil {
