@@ -8,9 +8,9 @@ import (
 
 type Options struct {
 	CountEntries   bool // подсчитать количество встречаний строки во входных данных
-	OnlyRepeating  bool // вывести только те строки, которые повторились во входных данных.
-	OnlyUnique     bool // вывести только те строки, которые не повторились во входных данных.
-	IgnoreFields   int  // не учитывать первые num_fields полей в строке.
+	OnlyRepeating  bool // вывести только те строки, которые повторились во входных данных
+	OnlyUnique     bool // вывести только те строки, которые не повторились во входных данных
+	IgnoreFields   int  // не учитывать первые num_fields полей в строке
 	IgnoreChars    int  // не учитывать первые num_chars символов в строке
 	IgnoreRegister bool // не учитывать регистр букв
 }
