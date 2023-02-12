@@ -13,8 +13,8 @@ func main() {
 	st.Push(3)
 	fmt.Println(st.Top())
 	st.Push(4)
+	st.Values()
 	fmt.Println(st.Pop())
 	fmt.Println(st.Pop())
 	fmt.Println(st.Top())
-
 }
