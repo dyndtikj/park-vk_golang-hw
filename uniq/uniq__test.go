@@ -96,7 +96,7 @@ func TestOptions_IsValid(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.name, func(t *testing.T) {
-			assert.Equal(t, test.input.IsValid(), test.output)
+			assert.Equal(t, test.output, test.input.IsValid())
 		})
 	}
 }
@@ -189,7 +189,7 @@ func TestUniq(t *testing.T) {
 			if err != nil {
 				log.Fatal(err)
 			}
-			assert.Equal(t, result, test.output)
+			assert.Equal(t, test.output, result)
 		})
 	}
 }
