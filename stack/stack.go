@@ -24,7 +24,7 @@ func (st *Stack) Top() (any, bool) {
 }
 
 func (st *Stack) Push(node any) {
-	st.nodes = append(st.nodes, node)
+	st.nodes = append([]any{node}, st.nodes...)
 }
 
 func (st *Stack) Pop() (top any, ok bool) {
