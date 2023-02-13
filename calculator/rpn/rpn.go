@@ -63,7 +63,7 @@ func CreateRPN(tokens []token.Token) ([]token.Token, bool) {
 	return postfixTokens, true
 }
 
-func EvaluateRpn(tokens []token.Token) (int, error) {
+func EvaluateRpn(tokens []token.Token) (float64, error) {
 	st := stack.New[token.Token]()
 	for _, tok := range tokens {
 		switch tok.Type {
@@ -79,12 +79,12 @@ func EvaluateRpn(tokens []token.Token) (int, error) {
 				return 0, errors.New("Not enough args for operator" + tok.Literal)
 			}
 			// TODO fix this :-)
-			var res int
-			firstVal, err := strconv.Atoi(firstTok.Literal)
+			var res float64
+			firstVal, err := strconv.ParseFloat(firstTok.Literal, 64)
 			if err != nil {
 				return 0, errors.New("Cant convert token: " + firstTok.Literal + "to number")
 			}
-			secondVal, err := strconv.Atoi(secondTok.Literal)
+			secondVal, err := strconv.ParseFloat(secondTok.Literal, 64)
 			if err != nil {
 				return 0, errors.New("Cant convert token: " + secondTok.Literal + "to number")
 			}
@@ -98,7 +98,7 @@ func EvaluateRpn(tokens []token.Token) (int, error) {
 			case "/":
 				res = secondVal / firstVal
 			}
-			t := token.NewToken(token.NUMBER, strconv.Itoa(res))
+			t := token.NewToken(token.NUMBER, strconv.FormatFloat(res, 'f', 3, 64))
 			st.Push(t)
 		}
 	}
@@ -106,7 +106,7 @@ func EvaluateRpn(tokens []token.Token) (int, error) {
 	if !ok {
 		return 0, errors.New("Expected token of result")
 	}
-	result, err := strconv.Atoi(tok.Literal)
+	result, err := strconv.ParseFloat(tok.Literal, 64)
 	if err != nil {
 		return 0, errors.New("Cant convert token: " + tok.Literal + "to number")
 	}
