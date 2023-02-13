@@ -1,38 +1,41 @@
-package calc_util
+package tokenizer
 
-import "errors"
+import (
+	"calculator/calculator/token"
+	"errors"
+)
 
 type Tokenizer struct {
 	input  string
 	cursor int
 }
 
-func NewTokenizer(input string) *Tokenizer {
+func New(input string) *Tokenizer {
 	return &Tokenizer{
 		input:  input,
 		cursor: 0,
 	}
 }
 
-func (t *Tokenizer) NextToken() (Token, error) {
+func (t *Tokenizer) NextToken() (token.Token, error) {
 	t.skipSpace()
 
 	switch t.peekChar() {
 	case '+', '-', '/', '*':
-		token := NewToken(OPERATOR, string(t.peekChar()))
+		tok := token.NewToken(token.OPERATOR, string(t.peekChar()))
 		t.cursor++
-		return token, nil
+		return tok, nil
 	case '(':
-		token := NewToken(LPAR, string(t.peekChar()))
+		tok := token.NewToken(token.L_PAR, string(t.peekChar()))
 		t.cursor++
-		return token, nil
+		return tok, nil
 	case ')':
-		token := NewToken(RPAR, string(t.peekChar()))
+		tok := token.NewToken(token.R_PAR, string(t.peekChar()))
 		t.cursor++
-		return token, nil
+		return tok, nil
 
 	case 0:
-		return NewToken(EOF, ""), nil
+		return token.NewToken(token.EOF, ""), nil
 
 	default:
 		if t.isDigit(t.peekChar()) {
@@ -43,9 +46,9 @@ func (t *Tokenizer) NextToken() (Token, error) {
 				t.cursor++
 			}
 
-			return NewToken(NUMBER, number), nil
+			return token.NewToken(token.NUMBER, number), nil
 		}
-		return Token{}, errors.New("Can't find token from moment: " + t.input[t.cursor:])
+		return token.Token{}, errors.New("Can't find token from moment: " + t.input[t.cursor:])
 	}
 }
 

@@ -1,14 +1,15 @@
-package calc_util
+package token
 
-type TokenType int
+// Псевдоним для типа токена
+type Type int
 
-// language
+// все возможные типы для токенов
 const (
 	EOF = iota
 	NUMBER
 	OPERATOR
-	LPAR
-	RPAR
+	L_PAR
+	R_PAR
 )
 
 // Надо немного подтюнить чтоб так явно не работать с литералами
@@ -20,11 +21,11 @@ var Priority = map[string]int{
 }
 
 type Token struct {
-	Type    TokenType
+	Type    Type
 	Literal string
 }
 
-func NewToken(t TokenType, l string) Token {
+func NewToken(t Type, l string) Token {
 	return Token{
 		Type:    t,
 		Literal: l,
