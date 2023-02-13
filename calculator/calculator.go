@@ -3,8 +3,7 @@ package calculator
 import (
 	"calculator/calculator/parser"
 	"calculator/calculator/rpn"
-	"fmt"
-	"log"
+	"errors"
 )
 
 func checkExpression(input string) error {
@@ -12,18 +11,23 @@ func checkExpression(input string) error {
 }
 
 func Calculate(input string) (float64, error) {
+	err := checkExpression(input)
+	if err != nil {
+		return 0, err
+	}
+
 	tokens, err := parser.Parse(input)
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 
 	rpnTokens, ok := rpn.CreateRPN(tokens)
 	if !ok {
-		fmt.Println("some error")
+		return 0, errors.New("cant create RPN from your input")
 	}
 	res, err := rpn.EvaluateRpn(rpnTokens)
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 	return res, nil
 }

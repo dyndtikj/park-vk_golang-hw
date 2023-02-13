@@ -9,8 +9,6 @@ import (
 )
 
 func main() {
-	fmt.Println("Enter your expression")
-	fmt.Print(">> ")
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
 	line := scanner.Text()
@@ -18,6 +16,5 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	fmt.Println("Result: ", res)
+	fmt.Println(res)
 }
