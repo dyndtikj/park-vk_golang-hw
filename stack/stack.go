@@ -42,7 +42,7 @@ func (st *Stack) Pop() (top any, ok bool) {
 func (st *Stack) Values() []any {
 	nodesCopy := make([]any, st.Len())
 	copy(nodesCopy, st.nodes)
-	size := reflect.ValueOf(nodesCopy).Len()
+	size := len(nodesCopy)
 	swap := reflect.Swapper(nodesCopy)
 	for i, j := 0, size-1; i < j; i, j = i+1, j-1 {
 		swap(i, j)
