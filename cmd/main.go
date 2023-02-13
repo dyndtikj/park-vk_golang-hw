@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"calculator/calculator/parser"
+	"calculator/calculator/rpn"
 	"calculator/calculator/token"
 	"fmt"
 	"log"
@@ -27,4 +28,10 @@ func main() {
 			fmt.Println("Priority: ", token.Priority[t.Literal])
 		}
 	}
+	fmt.Println("++++++++++++++")
+	rpnTokens, ok := rpn.CreateRPN(tokens)
+	if !ok {
+		fmt.Println("some error")
+	}
+	fmt.Println(rpnTokens)
 }

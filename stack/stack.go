@@ -4,34 +4,34 @@ import (
 	"reflect"
 )
 
-type Stack struct {
-	nodes []any
+type Stack[T any] struct {
+	nodes []T
 }
 
-func New() *Stack {
-	return &Stack{make([]any, 0)}
+func New[T any]() *Stack[T] {
+	return &Stack[T]{make([]T, 0)}
 }
 
-func (st *Stack) Len() int {
+func (st *Stack[T]) Len() int {
 	return len(st.nodes)
 }
 
-func (st *Stack) IsEmpty() bool {
+func (st *Stack[T]) IsEmpty() bool {
 	return st.Len() == 0
 }
 
-func (st *Stack) Top() (any, bool) {
+func (st *Stack[T]) Top() (result T, ok bool) {
 	if st.IsEmpty() {
-		return nil, false
+		return
 	}
 	return st.nodes[st.Len()-1], true
 }
 
-func (st *Stack) Push(node any) {
+func (st *Stack[T]) Push(node T) {
 	st.nodes = append(st.nodes, node)
 }
 
-func (st *Stack) Pop() (top any, ok bool) {
+func (st *Stack[T]) Pop() (top T, ok bool) {
 	top, ok = st.Top()
 	if ok {
 		st.nodes = st.nodes[:st.Len()-1]
@@ -39,8 +39,8 @@ func (st *Stack) Pop() (top any, ok bool) {
 	return
 }
 
-func (st *Stack) Values() []any {
-	nodesCopy := make([]any, st.Len())
+func (st *Stack[T]) Values() []T {
+	nodesCopy := make([]T, st.Len())
 	copy(nodesCopy, st.nodes)
 	size := len(nodesCopy)
 	swap := reflect.Swapper(nodesCopy)
