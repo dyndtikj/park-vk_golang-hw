@@ -3,7 +3,7 @@ package stack
 import "testing"
 
 func TestStack_Push(t *testing.T) {
-	stack := New()
+	stack := New[int]()
 	if val := stack.IsEmpty(); val != true {
 		t.Errorf("Expected empty stack")
 	}
@@ -27,7 +27,7 @@ func TestStack_Push(t *testing.T) {
 }
 
 func TestStack_Pop(t *testing.T) {
-	stack := New()
+	stack := New[int]()
 	stack.Push(0)
 	stack.Push(1)
 	stack.Push(2)
@@ -44,14 +44,14 @@ func TestStack_Pop(t *testing.T) {
 	if val, ok := stack.Pop(); val != 0 || !ok {
 		t.Errorf("Got %v expected %v", val, 0)
 	}
-	if val, ok := stack.Pop(); val != nil || ok {
-		t.Errorf("Got %v expected %v", val, nil)
+	if _, ok := stack.Pop(); ok {
+		t.Errorf("Got %v expected %v", ok, false)
 	}
 }
 
 func TestStack_Top(t *testing.T) {
-	stack := New()
-	if val, ok := stack.Top(); val != nil || ok {
+	stack := New[int]()
+	if _, ok := stack.Top(); ok {
 		t.Errorf("Expected empty stack")
 	}
 	stack.Push(0)
@@ -75,7 +75,7 @@ func TestStack_Top(t *testing.T) {
 		t.Errorf("Got %v expected %v", val, 0)
 	}
 	_, _ = stack.Pop()
-	if val, ok := stack.Top(); val != nil || ok {
-		t.Errorf("Got %v expected %v", val, nil)
+	if _, ok := stack.Top(); ok {
+		t.Errorf("Got %v expected %v (empty)", ok, false)
 	}
 }
