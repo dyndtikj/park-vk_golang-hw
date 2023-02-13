@@ -3,65 +3,53 @@ package rpn
 import (
 	"calculator/calculator/token"
 	"calculator/stack"
+	"errors"
+	"strconv"
 )
 
 // Создает слайс токенов в обратной польской нотации
 func CreateRPN(tokens []token.Token) ([]token.Token, bool) {
 	postfixTokens := make([]token.Token, 0)
 	st := stack.New[token.Token]()
-	idxInPostfix := 0
 	for _, t := range tokens {
 		switch t.Type {
 		case token.NUMBER:
-			{
-				postfixTokens = append(postfixTokens, t)
-				idxInPostfix++
-				continue
-			}
+			postfixTokens = append(postfixTokens, t)
 		case token.L_PAR:
-			{
-				st.Push(t)
-				continue
-			}
+			st.Push(t)
 		case token.R_PAR:
-			{
-				for !st.IsEmpty() {
-					topToken, ok := st.Pop()
-					if !ok {
-						return postfixTokens, ok
-					}
-					if topToken.Type == token.L_PAR {
-						break
-					}
-					postfixTokens = append(postfixTokens, topToken)
-				}
+			for !st.IsEmpty() {
 				topToken, ok := st.Top()
 				if !ok {
 					return postfixTokens, ok
 				}
 				if topToken.Type == token.L_PAR {
-					// ignore err cause handled higher
-					_, _ = st.Pop()
+					break
 				}
-				continue
+				postfixTokens = append(postfixTokens, topToken)
+				_, _ = st.Pop()
+			}
+			topToken, ok := st.Top()
+			if !ok {
+				return postfixTokens, ok
+			}
+			if topToken.Type == token.L_PAR {
+				// ignore err cause handled higher
+				_, _ = st.Pop()
 			}
 		case token.OPERATOR:
-			{
-				for !st.IsEmpty() {
-					topToken, ok := st.Top()
-					if !ok {
-						return postfixTokens, ok
-					}
-					if token.Priority[t.Literal] > token.Priority[topToken.Literal] || topToken.Type == token.L_PAR {
-						break
-					}
-					_, _ = st.Pop()
-					postfixTokens = append(postfixTokens, topToken)
-					idxInPostfix++
+			for !st.IsEmpty() {
+				topToken, ok := st.Top()
+				if !ok {
+					return postfixTokens, ok
 				}
-				st.Push(t)
-				continue
+				if token.Priority[t.Literal] > token.Priority[topToken.Literal] || topToken.Type == token.L_PAR {
+					break
+				}
+				_, _ = st.Pop()
+				postfixTokens = append(postfixTokens, topToken)
 			}
+			st.Push(t)
 		}
 	}
 	for !st.IsEmpty() {
@@ -71,7 +59,56 @@ func CreateRPN(tokens []token.Token) ([]token.Token, bool) {
 		}
 		postfixTokens = append(postfixTokens, topToken)
 		_, _ = st.Pop()
-		idxInPostfix++
 	}
 	return postfixTokens, true
+}
+
+func EvaluateRpn(tokens []token.Token) (int, error) {
+	st := stack.New[token.Token]()
+	for _, tok := range tokens {
+		switch tok.Type {
+		case token.NUMBER:
+			st.Push(tok)
+		case token.OPERATOR:
+			firstTok, ok := st.Pop()
+			if !ok {
+				return 0, errors.New("Not enough args for operator" + tok.Literal)
+			}
+			secondTok, ok := st.Pop()
+			if !ok {
+				return 0, errors.New("Not enough args for operator" + tok.Literal)
+			}
+			// TODO fix this :-)
+			var res int
+			firstVal, err := strconv.Atoi(firstTok.Literal)
+			if err != nil {
+				return 0, errors.New("Cant convert token: " + firstTok.Literal + "to number")
+			}
+			secondVal, err := strconv.Atoi(secondTok.Literal)
+			if err != nil {
+				return 0, errors.New("Cant convert token: " + secondTok.Literal + "to number")
+			}
+			switch tok.Literal {
+			case "+":
+				res = secondVal + firstVal
+			case "-":
+				res = secondVal - firstVal
+			case "*":
+				res = secondVal * firstVal
+			case "/":
+				res = secondVal / firstVal
+			}
+			t := token.NewToken(token.NUMBER, strconv.Itoa(res))
+			st.Push(t)
+		}
+	}
+	tok, ok := st.Pop()
+	if !ok {
+		return 0, errors.New("Expected token of result")
+	}
+	result, err := strconv.Atoi(tok.Literal)
+	if err != nil {
+		return 0, errors.New("Cant convert token: " + tok.Literal + "to number")
+	}
+	return result, nil
 }
