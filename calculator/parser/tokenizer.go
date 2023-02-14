@@ -21,15 +21,15 @@ func (t *Tokenizer) NextToken() (token.Token, error) {
 	t.skipSpace()
 
 	switch t.peekChar() {
-	case '+', '-', '/', '*':
+	case token.PLUS_LIT, token.MINUS_LIT, token.MUL_LIT, token.DIV_LIT:
 		tok := token.NewToken(token.OPERATOR, string(t.peekChar()))
 		t.cursor++
 		return tok, nil
-	case '(':
+	case token.L_PAR_LIT:
 		tok := token.NewToken(token.L_PAR, string(t.peekChar()))
 		t.cursor++
 		return tok, nil
-	case ')':
+	case token.R_PART_LIT:
 		tok := token.NewToken(token.R_PAR, string(t.peekChar()))
 		t.cursor++
 		return tok, nil
@@ -39,7 +39,6 @@ func (t *Tokenizer) NextToken() (token.Token, error) {
 
 	default:
 		if t.isDigit(t.peekChar()) {
-
 			var number string
 			for t.isDigit(t.peekChar()) {
 				number += string(t.peekChar())

@@ -111,7 +111,7 @@ func TestEvaluateRpn(t *testing.T) {
 func TestCreateRPN(t *testing.T) {
 	type outputCase struct {
 		tokens []token.Token
-		ok     bool
+		err    error
 	}
 	type testCase struct {
 		input  []token.Token
@@ -132,7 +132,7 @@ func TestCreateRPN(t *testing.T) {
 					{token.NUMBER, "1"},
 					{token.NUMBER, "2"},
 					{token.OPERATOR, "+"}},
-				ok: true,
+				err: nil,
 			},
 			"test : 1+2 to 12+",
 		},
@@ -152,7 +152,7 @@ func TestCreateRPN(t *testing.T) {
 					{token.NUMBER, "4"},
 					{token.OPERATOR, "*"},
 					{token.OPERATOR, "+"}},
-				ok: true,
+				err: nil,
 			},
 			"test : 2+3*4 to (2 3 4*+)",
 		},
@@ -174,7 +174,7 @@ func TestCreateRPN(t *testing.T) {
 					{token.OPERATOR, "+"},
 					{token.NUMBER, "4"},
 					{token.OPERATOR, "*"}},
-				ok: true,
+				err: nil,
 			},
 			"test : (2+3)*4 to (2 3 + 4 *)",
 		},
@@ -202,7 +202,7 @@ func TestCreateRPN(t *testing.T) {
 					{token.NUMBER, "23"},
 					{token.OPERATOR, "-"},
 					{token.OPERATOR, "*"}},
-				ok: true,
+				err: nil,
 			},
 			"test :(111+121)*(91-23) to (111 121 + 91 23 - *)",
 		},
@@ -226,7 +226,7 @@ func TestCreateRPN(t *testing.T) {
 					{token.OPERATOR, "+"},
 					{token.NUMBER, "23"},
 					{token.OPERATOR, "-"}},
-				ok: true,
+				err: nil,
 			},
 			"test :111+121*91-23 to (111 121 91 * + 23 -)",
 		},
@@ -234,9 +234,9 @@ func TestCreateRPN(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.name, func(t *testing.T) {
-			tokens, ok := CreateRPN(test.input)
-			if ok != test.output.ok {
-				t.Errorf("Expected result of operation: %v, got %v ", test.output.ok, ok)
+			tokens, err := CreateRPN(test.input)
+			if err != test.output.err {
+				t.Errorf("Expected result of operation: %v, got %v ", test.output.err, err)
 			}
 			for i, tok := range tokens {
 				assert.Equal(t, test.output.tokens[i].Literal, tok.Literal)

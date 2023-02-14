@@ -8,7 +8,7 @@ import (
 )
 
 // Создает слайс токенов в обратной польской нотации
-func CreateRPN(tokens []token.Token) ([]token.Token, bool) {
+func CreateRPN(tokens []token.Token) ([]token.Token, error) {
 	postfixTokens := make([]token.Token, 0)
 	st := stack.New[token.Token]()
 	for _, t := range tokens {
@@ -21,7 +21,7 @@ func CreateRPN(tokens []token.Token) ([]token.Token, bool) {
 			for !st.IsEmpty() {
 				topToken, ok := st.Top()
 				if !ok {
-					return postfixTokens, ok
+					return postfixTokens, errors.New("internal error, cant create RPN")
 				}
 				if topToken.Type == token.L_PAR {
 					break
@@ -31,7 +31,7 @@ func CreateRPN(tokens []token.Token) ([]token.Token, bool) {
 			}
 			topToken, ok := st.Top()
 			if !ok {
-				return postfixTokens, ok
+				return postfixTokens, errors.New("internal error, cant create RPN")
 			}
 			if topToken.Type == token.L_PAR {
 				// ignore err cause handled higher
@@ -41,9 +41,9 @@ func CreateRPN(tokens []token.Token) ([]token.Token, bool) {
 			for !st.IsEmpty() {
 				topToken, ok := st.Top()
 				if !ok {
-					return postfixTokens, ok
+					return postfixTokens, errors.New("internal error, cant create RPN")
 				}
-				if token.Priority[t.Literal] > token.Priority[topToken.Literal] || topToken.Type == token.L_PAR {
+				if token.Priority[t.Literal[0]] > token.Priority[topToken.Literal[0]] || topToken.Type == token.L_PAR {
 					break
 				}
 				_, _ = st.Pop()
@@ -55,12 +55,12 @@ func CreateRPN(tokens []token.Token) ([]token.Token, bool) {
 	for !st.IsEmpty() {
 		topToken, ok := st.Top()
 		if !ok {
-			return postfixTokens, ok
+			return postfixTokens, errors.New("internal error, cant create RPN")
 		}
 		postfixTokens = append(postfixTokens, topToken)
 		_, _ = st.Pop()
 	}
-	return postfixTokens, true
+	return postfixTokens, nil
 }
 
 func EvaluateRpn(tokens []token.Token) (float64, error) {

@@ -12,12 +12,21 @@ const (
 	R_PAR
 )
 
-// Надо немного подтюнить чтоб так явно не работать с литералами
-var Priority = map[string]int{
-	"+": 1,
-	"-": 1,
-	"*": 2,
-	"/": 2,
+const (
+	//EOF_LIT    = ''
+	PLUS_LIT   = '+'
+	MINUS_LIT  = '-'
+	MUL_LIT    = '*'
+	DIV_LIT    = '/'
+	L_PAR_LIT  = '('
+	R_PART_LIT = ')'
+)
+
+var Priority = map[byte]int{
+	PLUS_LIT:  1,
+	MINUS_LIT: 1,
+	MUL_LIT:   2,
+	DIV_LIT:   2,
 }
 
 type Token struct {
