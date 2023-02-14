@@ -22,7 +22,7 @@ type line struct {
 }
 
 type repLine struct {
-	line  line //информация о строке (оригнальная и после применения опций)
+	line       //информация о строке (оригнальная и после применения опций)
 	count uint //количество данных строк
 }
 
@@ -39,7 +39,7 @@ func (r repLine) isUniq() bool {
 }
 
 func (o Options) IsValid() bool {
-	//вспомнили дискретку
+	//вспомнил дискретку
 	return o.IgnoreChars >= 0 && o.IgnoreFields >= 0 &&
 		(!o.OnlyUnique && !o.OnlyRepeating ||
 			(!o.CountEntries && ((o.OnlyRepeating && !o.OnlyUnique) || (!o.OnlyRepeating && o.OnlyUnique))))
@@ -57,14 +57,13 @@ func useOptions(line string, options Options) (result string, err error) {
 		result = strings.Join(str[options.IgnoreFields:], " ")
 	}
 	if options.IgnoreChars > 0 {
+		if options.IgnoreChars > len(result) {
+			return result, errors.New("Str:" + line + "dont have " +
+				strconv.Itoa(options.IgnoreChars) + "letters to ignore")
+		}
 		if options.IgnoreFields > 0 {
 			// При использовании вместе с параметром -f учитываются первые символы после num_fields полей
 			// (не учитывая пробел-разделитель после последнего поля).
-			if options.IgnoreChars > len(result) {
-				return result, errors.New("Str:\"" + line + "\" dont have " +
-					strconv.Itoa(options.IgnoreChars) + " letters after applying ignore " +
-					strconv.Itoa(options.IgnoreFields) + " fields option")
-			}
 			result = result[:options.IgnoreChars]
 		} else {
 			result = result[options.IgnoreChars:]
@@ -118,6 +117,7 @@ func Uniq(options Options, input []string) (result []string, err error) {
 			outStr += strconv.Itoa(int(repLine.count)) + " "
 		}
 		outStr += repLine.getOrigin()
+
 		if options.OnlyRepeating {
 			if !repLine.isUniq() {
 				result = append(result, outStr)

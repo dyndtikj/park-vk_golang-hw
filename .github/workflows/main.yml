@@ -43,4 +43,4 @@ jobs:
 
       # Run testing on the code
       - name: Run testing
-        run: cd ./uniq && go test -v
+        run:  go test ./... -v

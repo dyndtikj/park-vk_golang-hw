@@ -69,16 +69,14 @@ func writeData(settings ioSettings, data []string) (err error) {
 			return
 		}
 		defer func(file *os.File) {
-			err = file.Close()
-			if err != nil {
+			if err = file.Close(); err != nil {
 				return
 			}
 		}(file)
 	}
 	for _, str := range data {
-		_, err = file.WriteString(str + "\n")
-		if err != nil {
-			return err
+		if _, err = file.WriteString(str + "\n"); err != nil {
+			return nil
 		}
 	}
 	return nil
