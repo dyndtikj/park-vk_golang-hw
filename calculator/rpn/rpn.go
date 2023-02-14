@@ -86,18 +86,7 @@ func EvaluateRpn(tokens []token.Token) (result float64, err error) {
 			if err != nil {
 				return
 			}
-			// TODO fix this sw case
-			var res float64 = 0
-			switch tok.Literal {
-			case "+":
-				res = secondVal + firstVal
-			case "-":
-				res = secondVal - firstVal
-			case "*":
-				res = secondVal * firstVal
-			case "/":
-				res = secondVal / firstVal
-			}
+			res := token.Actions[tok.Literal[0]](secondVal, firstVal)
 			t := token.NewToken(token.NumType, strconv.FormatFloat(res, 'f', 3, 64))
 			st.Push(t)
 		}

@@ -21,11 +21,28 @@ const (
 	RPartLit = ')'
 )
 
+type action func(a, b float64) float64
+
 var Priority = map[byte]int{
 	PlusLit:  1,
 	MinusLit: 1,
 	MulLit:   2,
 	DivLit:   2,
+}
+
+var Actions = map[byte]action{
+	PlusLit: func(a, b float64) float64 {
+		return a + b
+	},
+	MinusLit: func(a, b float64) float64 {
+		return a - b
+	},
+	MulLit: func(a, b float64) float64 {
+		return a * b
+	},
+	DivLit: func(a, b float64) float64 {
+		return a / b
+	},
 }
 
 type Token struct {
