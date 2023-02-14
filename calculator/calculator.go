@@ -16,9 +16,11 @@ func checkExpression(input string) error {
 			counter--
 		}
 		if counter < 0 {
-			err := errors.New("wrong parentheses")
-			return err
+			return errors.New("wrong parentheses")
 		}
+	}
+	if counter != 0 {
+		return errors.New("wrong parentheses")
 	}
 	return nil
 }
