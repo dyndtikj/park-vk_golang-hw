@@ -21,21 +21,21 @@ func (t *Tokenizer) NextToken() (token.Token, error) {
 	t.skipSpace()
 
 	switch t.peekChar() {
-	case token.PLUS_LIT, token.MINUS_LIT, token.MUL_LIT, token.DIV_LIT:
-		tok := token.NewToken(token.OPERATOR, string(t.peekChar()))
+	case token.PlusLit, token.MinusLit, token.MulLit, token.DivLit:
+		tok := token.NewToken(token.OpType, string(t.peekChar()))
 		t.cursor++
 		return tok, nil
-	case token.L_PAR_LIT:
-		tok := token.NewToken(token.L_PAR, string(t.peekChar()))
+	case token.LParLit:
+		tok := token.NewToken(token.LparType, string(t.peekChar()))
 		t.cursor++
 		return tok, nil
-	case token.R_PART_LIT:
-		tok := token.NewToken(token.R_PAR, string(t.peekChar()))
+	case token.RPartLit:
+		tok := token.NewToken(token.RparType, string(t.peekChar()))
 		t.cursor++
 		return tok, nil
 
 	case 0:
-		return token.NewToken(token.EOF, ""), nil
+		return token.NewToken(token.EofType, ""), nil
 
 	default:
 		if t.isDigit(t.peekChar()) {
@@ -45,7 +45,7 @@ func (t *Tokenizer) NextToken() (token.Token, error) {
 				t.cursor++
 			}
 
-			return token.NewToken(token.NUMBER, number), nil
+			return token.NewToken(token.NumType, number), nil
 		}
 		return token.Token{}, errors.New("Can't find token from moment: " + t.input[t.cursor:])
 	}

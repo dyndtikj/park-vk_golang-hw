@@ -21,9 +21,9 @@ func TestEvaluateRpn(t *testing.T) {
 	testCases := []testCase{
 		{
 			[]token.Token{
-				{token.NUMBER, "1"},
-				{token.NUMBER, "2"},
-				{token.OPERATOR, "+"}},
+				{token.NumType, "1"},
+				{token.NumType, "2"},
+				{token.OpType, "+"}},
 			outputCase{
 				result: 3,
 				err:    nil,
@@ -33,11 +33,11 @@ func TestEvaluateRpn(t *testing.T) {
 		{
 			// 2+3*4
 			[]token.Token{
-				{token.NUMBER, "2"},
-				{token.NUMBER, "3"},
-				{token.NUMBER, "4"},
-				{token.OPERATOR, "*"},
-				{token.OPERATOR, "+"}},
+				{token.NumType, "2"},
+				{token.NumType, "3"},
+				{token.NumType, "4"},
+				{token.OpType, "*"},
+				{token.OpType, "+"}},
 			// 234*+
 			outputCase{
 				result: 14,
@@ -47,11 +47,11 @@ func TestEvaluateRpn(t *testing.T) {
 		},
 		{
 			[]token.Token{
-				{token.NUMBER, "2"},
-				{token.NUMBER, "3"},
-				{token.OPERATOR, "+"},
-				{token.NUMBER, "4"},
-				{token.OPERATOR, "*"}},
+				{token.NumType, "2"},
+				{token.NumType, "3"},
+				{token.OpType, "+"},
+				{token.NumType, "4"},
+				{token.OpType, "*"}},
 			outputCase{
 				result: 20,
 				err:    nil,
@@ -60,13 +60,13 @@ func TestEvaluateRpn(t *testing.T) {
 		},
 		{
 			[]token.Token{
-				{token.NUMBER, "111"},
-				{token.NUMBER, "121"},
-				{token.OPERATOR, "+"},
-				{token.NUMBER, "91"},
-				{token.NUMBER, "23"},
-				{token.OPERATOR, "-"},
-				{token.OPERATOR, "*"}},
+				{token.NumType, "111"},
+				{token.NumType, "121"},
+				{token.OpType, "+"},
+				{token.NumType, "91"},
+				{token.NumType, "23"},
+				{token.OpType, "-"},
+				{token.OpType, "*"}},
 			outputCase{
 				result: 15776,
 				err:    nil,
@@ -76,13 +76,13 @@ func TestEvaluateRpn(t *testing.T) {
 		{
 			// 111+121*91-23
 			[]token.Token{
-				{token.NUMBER, "111"},
-				{token.NUMBER, "121"},
-				{token.NUMBER, "91"},
-				{token.OPERATOR, "*"},
-				{token.OPERATOR, "+"},
-				{token.NUMBER, "23"},
-				{token.OPERATOR, "-"}},
+				{token.NumType, "111"},
+				{token.NumType, "121"},
+				{token.NumType, "91"},
+				{token.OpType, "*"},
+				{token.OpType, "+"},
+				{token.NumType, "23"},
+				{token.OpType, "-"}},
 
 			outputCase{
 				result: 11099,
@@ -123,15 +123,15 @@ func TestCreateRPN(t *testing.T) {
 		{
 			// 1+2
 			[]token.Token{
-				{token.NUMBER, "1"},
-				{token.OPERATOR, "+"},
-				{token.NUMBER, "2"}},
+				{token.NumType, "1"},
+				{token.OpType, "+"},
+				{token.NumType, "2"}},
 			// 12+
 			outputCase{
 				tokens: []token.Token{
-					{token.NUMBER, "1"},
-					{token.NUMBER, "2"},
-					{token.OPERATOR, "+"}},
+					{token.NumType, "1"},
+					{token.NumType, "2"},
+					{token.OpType, "+"}},
 				err: nil,
 			},
 			"test : 1+2 to 12+",
@@ -139,19 +139,19 @@ func TestCreateRPN(t *testing.T) {
 		{
 			// 2+3*4
 			[]token.Token{
-				{token.NUMBER, "2"},
-				{token.OPERATOR, "+"},
-				{token.NUMBER, "3"},
-				{token.OPERATOR, "*"},
-				{token.NUMBER, "4"}},
+				{token.NumType, "2"},
+				{token.OpType, "+"},
+				{token.NumType, "3"},
+				{token.OpType, "*"},
+				{token.NumType, "4"}},
 			// 234*+
 			outputCase{
 				tokens: []token.Token{
-					{token.NUMBER, "2"},
-					{token.NUMBER, "3"},
-					{token.NUMBER, "4"},
-					{token.OPERATOR, "*"},
-					{token.OPERATOR, "+"}},
+					{token.NumType, "2"},
+					{token.NumType, "3"},
+					{token.NumType, "4"},
+					{token.OpType, "*"},
+					{token.OpType, "+"}},
 				err: nil,
 			},
 			"test : 2+3*4 to (2 3 4*+)",
@@ -159,21 +159,21 @@ func TestCreateRPN(t *testing.T) {
 		{
 			// (2+3)*4
 			[]token.Token{
-				{token.L_PAR, "("},
-				{token.NUMBER, "2"},
-				{token.OPERATOR, "+"},
-				{token.NUMBER, "3"},
-				{token.R_PAR, ")"},
-				{token.OPERATOR, "*"},
-				{token.NUMBER, "4"}},
+				{token.LparType, "("},
+				{token.NumType, "2"},
+				{token.OpType, "+"},
+				{token.NumType, "3"},
+				{token.RparType, ")"},
+				{token.OpType, "*"},
+				{token.NumType, "4"}},
 			// 23+4*
 			outputCase{
 				tokens: []token.Token{
-					{token.NUMBER, "2"},
-					{token.NUMBER, "3"},
-					{token.OPERATOR, "+"},
-					{token.NUMBER, "4"},
-					{token.OPERATOR, "*"}},
+					{token.NumType, "2"},
+					{token.NumType, "3"},
+					{token.OpType, "+"},
+					{token.NumType, "4"},
+					{token.OpType, "*"}},
 				err: nil,
 			},
 			"test : (2+3)*4 to (2 3 + 4 *)",
@@ -181,27 +181,27 @@ func TestCreateRPN(t *testing.T) {
 		{
 			// (111+121)*(91-23)
 			[]token.Token{
-				{token.L_PAR, "("},
-				{token.NUMBER, "111"},
-				{token.OPERATOR, "+"},
-				{token.NUMBER, "121"},
-				{token.R_PAR, ")"},
-				{token.OPERATOR, "*"},
-				{token.L_PAR, "("},
-				{token.NUMBER, "91"},
-				{token.OPERATOR, "-"},
-				{token.NUMBER, "23"},
-				{token.R_PAR, ")"}},
+				{token.LparType, "("},
+				{token.NumType, "111"},
+				{token.OpType, "+"},
+				{token.NumType, "121"},
+				{token.RparType, ")"},
+				{token.OpType, "*"},
+				{token.LparType, "("},
+				{token.NumType, "91"},
+				{token.OpType, "-"},
+				{token.NumType, "23"},
+				{token.RparType, ")"}},
 			// 111 121 + 91 23 - *
 			outputCase{
 				tokens: []token.Token{
-					{token.NUMBER, "111"},
-					{token.NUMBER, "121"},
-					{token.OPERATOR, "+"},
-					{token.NUMBER, "91"},
-					{token.NUMBER, "23"},
-					{token.OPERATOR, "-"},
-					{token.OPERATOR, "*"}},
+					{token.NumType, "111"},
+					{token.NumType, "121"},
+					{token.OpType, "+"},
+					{token.NumType, "91"},
+					{token.NumType, "23"},
+					{token.OpType, "-"},
+					{token.OpType, "*"}},
 				err: nil,
 			},
 			"test :(111+121)*(91-23) to (111 121 + 91 23 - *)",
@@ -209,23 +209,23 @@ func TestCreateRPN(t *testing.T) {
 		{
 			// 111+121*91-23
 			[]token.Token{
-				{token.NUMBER, "111"},
-				{token.OPERATOR, "+"},
-				{token.NUMBER, "121"},
-				{token.OPERATOR, "*"},
-				{token.NUMBER, "91"},
-				{token.OPERATOR, "-"},
-				{token.NUMBER, "23"}},
+				{token.NumType, "111"},
+				{token.OpType, "+"},
+				{token.NumType, "121"},
+				{token.OpType, "*"},
+				{token.NumType, "91"},
+				{token.OpType, "-"},
+				{token.NumType, "23"}},
 			// 111 121 91 * + 23 -
 			outputCase{
 				tokens: []token.Token{
-					{token.NUMBER, "111"},
-					{token.NUMBER, "121"},
-					{token.NUMBER, "91"},
-					{token.OPERATOR, "*"},
-					{token.OPERATOR, "+"},
-					{token.NUMBER, "23"},
-					{token.OPERATOR, "-"}},
+					{token.NumType, "111"},
+					{token.NumType, "121"},
+					{token.NumType, "91"},
+					{token.OpType, "*"},
+					{token.OpType, "+"},
+					{token.NumType, "23"},
+					{token.OpType, "-"}},
 				err: nil,
 			},
 			"test :111+121*91-23 to (111 121 91 * + 23 -)",

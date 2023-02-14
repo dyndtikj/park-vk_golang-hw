@@ -4,7 +4,6 @@ import (
 	"calculator/calculator/token"
 )
 
-// Возвращает слайс токенов
 func Parse(input string) (result []token.Token, err error) {
 	ter := New(input)
 
@@ -14,7 +13,7 @@ func Parse(input string) (result []token.Token, err error) {
 		if err != nil {
 			return
 		}
-		if t.Type == token.EOF {
+		if t.Type == token.EofType {
 			break
 		}
 		result = append(result, t)

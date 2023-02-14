@@ -21,7 +21,7 @@ func TestStack_Push(t *testing.T) {
 	if val := stack.Len(); val != 4 {
 		t.Errorf("Got %v expected %v", val, 3)
 	}
-	if val, ok := stack.Top(); val != 3 || !ok {
+	if val, ok := stack.Peek(); val != 3 || !ok {
 		t.Errorf("Got %v expected %v", val, 3)
 	}
 }
@@ -51,7 +51,7 @@ func TestStack_Pop(t *testing.T) {
 
 func TestStack_Top(t *testing.T) {
 	stack := New[int]()
-	if _, ok := stack.Top(); ok {
+	if _, ok := stack.Peek(); ok {
 		t.Errorf("Expected empty stack")
 	}
 	stack.Push(0)
@@ -59,23 +59,23 @@ func TestStack_Top(t *testing.T) {
 	stack.Push(2)
 	stack.Push(3)
 
-	if val, ok := stack.Top(); val != 3 || !ok {
+	if val, ok := stack.Peek(); val != 3 || !ok {
 		t.Errorf("Got %v expected %v", val, 3)
 	}
 	_, _ = stack.Pop()
-	if val, ok := stack.Top(); val != 2 || !ok {
+	if val, ok := stack.Peek(); val != 2 || !ok {
 		t.Errorf("Got %v expected %v", val, 2)
 	}
 	_, _ = stack.Pop()
-	if val, ok := stack.Top(); val != 1 || !ok {
+	if val, ok := stack.Peek(); val != 1 || !ok {
 		t.Errorf("Got %v expected %v", val, 1)
 	}
 	_, _ = stack.Pop()
-	if val, ok := stack.Top(); val != 0 || !ok {
+	if val, ok := stack.Peek(); val != 0 || !ok {
 		t.Errorf("Got %v expected %v", val, 0)
 	}
 	_, _ = stack.Pop()
-	if _, ok := stack.Top(); ok {
+	if _, ok := stack.Peek(); ok {
 		t.Errorf("Got %v expected %v (empty)", ok, false)
 	}
 }

@@ -20,7 +20,7 @@ func (st *Stack[T]) IsEmpty() bool {
 	return st.Len() == 0
 }
 
-func (st *Stack[T]) Top() (result T, ok bool) {
+func (st *Stack[T]) Peek() (result T, ok bool) {
 	if st.IsEmpty() {
 		return
 	}
@@ -32,7 +32,7 @@ func (st *Stack[T]) Push(node T) {
 }
 
 func (st *Stack[T]) Pop() (top T, ok bool) {
-	top, ok = st.Top()
+	top, ok = st.Peek()
 	if ok {
 		st.nodes = st.nodes[:st.Len()-1]
 	}

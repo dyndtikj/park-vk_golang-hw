@@ -5,28 +5,27 @@ type Type int
 
 // все возможные типы для токенов
 const (
-	EOF = iota
-	NUMBER
-	OPERATOR
-	L_PAR
-	R_PAR
+	EofType = iota
+	NumType
+	OpType
+	LparType
+	RparType
 )
 
 const (
-	//EOF_LIT    = ''
-	PLUS_LIT   = '+'
-	MINUS_LIT  = '-'
-	MUL_LIT    = '*'
-	DIV_LIT    = '/'
-	L_PAR_LIT  = '('
-	R_PART_LIT = ')'
+	PlusLit  = '+'
+	MinusLit = '-'
+	MulLit   = '*'
+	DivLit   = '/'
+	LParLit  = '('
+	RPartLit = ')'
 )
 
 var Priority = map[byte]int{
-	PLUS_LIT:  1,
-	MINUS_LIT: 1,
-	MUL_LIT:   2,
-	DIV_LIT:   2,
+	PlusLit:  1,
+	MinusLit: 1,
+	MulLit:   2,
+	DivLit:   2,
 }
 
 type Token struct {

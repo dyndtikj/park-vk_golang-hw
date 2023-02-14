@@ -10,9 +10,9 @@ import (
 func checkExpression(input string) error {
 	counter := 0
 	for _, c := range input {
-		if c == token.L_PAR_LIT {
+		if c == token.LParLit {
 			counter++
-		} else if c == token.R_PART_LIT {
+		} else if c == token.RPartLit {
 			counter--
 		}
 		if counter < 0 {
@@ -25,24 +25,24 @@ func checkExpression(input string) error {
 	return nil
 }
 
-func Calculate(input string) (float64, error) {
-	err := checkExpression(input)
+func Calculate(input string) (result float64, err error) {
+	err = checkExpression(input)
 	if err != nil {
-		return 0, err
+		return
 	}
 
 	tokens, err := parser.Parse(input)
 	if err != nil {
-		return 0, err
+		return
 	}
 
 	rpnTokens, err := rpn.CreateRPN(tokens)
 	if err != nil {
-		return 0, err
+		return
 	}
-	res, err := rpn.EvaluateRpn(rpnTokens)
+	result, err = rpn.EvaluateRpn(rpnTokens)
 	if err != nil {
 		return 0, err
 	}
-	return res, nil
+	return
 }

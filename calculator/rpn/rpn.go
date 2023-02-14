@@ -8,42 +8,42 @@ import (
 )
 
 // Создает слайс токенов в обратной польской нотации
-func CreateRPN(tokens []token.Token) ([]token.Token, error) {
-	postfixTokens := make([]token.Token, 0)
+func CreateRPN(tokens []token.Token) (postfixTokens []token.Token, err error) {
 	st := stack.New[token.Token]()
 	for _, t := range tokens {
 		switch t.Type {
-		case token.NUMBER:
+		case token.NumType:
 			postfixTokens = append(postfixTokens, t)
-		case token.L_PAR:
+		case token.LparType:
 			st.Push(t)
-		case token.R_PAR:
+		case token.RparType:
 			for !st.IsEmpty() {
-				topToken, ok := st.Top()
+				topToken, ok := st.Peek()
 				if !ok {
 					return postfixTokens, errors.New("internal error, cant create RPN")
 				}
-				if topToken.Type == token.L_PAR {
+				if topToken.Type == token.LparType {
 					break
 				}
 				postfixTokens = append(postfixTokens, topToken)
 				_, _ = st.Pop()
 			}
-			topToken, ok := st.Top()
+			topToken, ok := st.Peek()
 			if !ok {
 				return postfixTokens, errors.New("internal error, cant create RPN")
 			}
-			if topToken.Type == token.L_PAR {
+			if topToken.Type == token.LparType {
 				// ignore err cause handled higher
 				_, _ = st.Pop()
 			}
-		case token.OPERATOR:
+		case token.OpType:
 			for !st.IsEmpty() {
-				topToken, ok := st.Top()
+				topToken, ok := st.Peek()
 				if !ok {
 					return postfixTokens, errors.New("internal error, cant create RPN")
 				}
-				if token.Priority[t.Literal[0]] > token.Priority[topToken.Literal[0]] || topToken.Type == token.L_PAR {
+				if token.Priority[t.Literal[0]] > token.Priority[topToken.Literal[0]] ||
+					topToken.Type == token.LparType {
 					break
 				}
 				_, _ = st.Pop()
@@ -53,23 +53,22 @@ func CreateRPN(tokens []token.Token) ([]token.Token, error) {
 		}
 	}
 	for !st.IsEmpty() {
-		topToken, ok := st.Top()
+		topToken, ok := st.Pop()
 		if !ok {
 			return postfixTokens, errors.New("internal error, cant create RPN")
 		}
 		postfixTokens = append(postfixTokens, topToken)
-		_, _ = st.Pop()
 	}
-	return postfixTokens, nil
+	return
 }
 
-func EvaluateRpn(tokens []token.Token) (float64, error) {
+func EvaluateRpn(tokens []token.Token) (result float64, err error) {
 	st := stack.New[token.Token]()
 	for _, tok := range tokens {
 		switch tok.Type {
-		case token.NUMBER:
+		case token.NumType:
 			st.Push(tok)
-		case token.OPERATOR:
+		case token.OpType:
 			firstTok, ok := st.Pop()
 			if !ok {
 				return 0, errors.New("Not enough args for operator" + tok.Literal)
@@ -78,16 +77,17 @@ func EvaluateRpn(tokens []token.Token) (float64, error) {
 			if !ok {
 				return 0, errors.New("Not enough args for operator" + tok.Literal)
 			}
-			// TODO fix this :-)
-			var res float64
-			firstVal, err := strconv.ParseFloat(firstTok.Literal, 64)
+			var firstVal, secondVal float64
+			firstVal, err = strconv.ParseFloat(firstTok.Literal, 64)
 			if err != nil {
-				return 0, errors.New("Cant convert token: " + firstTok.Literal + "to number")
+				return
 			}
-			secondVal, err := strconv.ParseFloat(secondTok.Literal, 64)
+			secondVal, err = strconv.ParseFloat(secondTok.Literal, 64)
 			if err != nil {
-				return 0, errors.New("Cant convert token: " + secondTok.Literal + "to number")
+				return
 			}
+			// TODO fix this sw case
+			var res float64 = 0
 			switch tok.Literal {
 			case "+":
 				res = secondVal + firstVal
@@ -98,17 +98,17 @@ func EvaluateRpn(tokens []token.Token) (float64, error) {
 			case "/":
 				res = secondVal / firstVal
 			}
-			t := token.NewToken(token.NUMBER, strconv.FormatFloat(res, 'f', 3, 64))
+			t := token.NewToken(token.NumType, strconv.FormatFloat(res, 'f', 3, 64))
 			st.Push(t)
 		}
 	}
 	tok, ok := st.Pop()
 	if !ok {
-		return 0, errors.New("Expected token of result")
+		return 0, errors.New("expected token of result")
 	}
-	result, err := strconv.ParseFloat(tok.Literal, 64)
+	result, err = strconv.ParseFloat(tok.Literal, 64)
 	if err != nil {
-		return 0, errors.New("Cant convert token: " + tok.Literal + "to number")
+		return 0, err
 	}
 	return result, nil
 }
