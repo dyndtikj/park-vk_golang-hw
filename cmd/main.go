@@ -76,7 +76,7 @@ func writeData(settings ioSettings, data []string) (err error) {
 	}
 	for _, str := range data {
 		if _, err = file.WriteString(str + "\n"); err != nil {
-			return nil
+			return
 		}
 	}
 	return nil
