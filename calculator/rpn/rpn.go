@@ -87,7 +87,7 @@ func EvaluateRpn(tokens []token.Token) (result float64, err error) {
 				return
 			}
 			res := token.Actions[tok.Literal[0]](secondVal, firstVal)
-			t := token.NewToken(token.NumType, strconv.FormatFloat(res, 'f', 3, 64))
+			t := token.Token{Type: token.NumType, Literal: strconv.FormatFloat(res, 'f', 3, 64)}
 			st.Push(t)
 		}
 	}

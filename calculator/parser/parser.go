@@ -5,7 +5,7 @@ import (
 )
 
 func Parse(input string) (result []token.Token, err error) {
-	ter := New(input)
+	ter := Tokenizer{input, 0}
 
 	for {
 		var t token.Token

@@ -49,10 +49,3 @@ type Token struct {
 	Type    Type
 	Literal string
 }
-
-func NewToken(t Type, l string) Token {
-	return Token{
-		Type:    t,
-		Literal: l,
-	}
-}
