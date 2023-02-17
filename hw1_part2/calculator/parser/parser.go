@@ -1,22 +1,22 @@
 package parser
 
 import (
+	"fmt"
 	"homework/hw1_part2/calculator/token"
 )
 
-func Parse(input string) (result []token.Token, err error) {
+func Parse(input string) ([]token.Token, error) {
 	ter := Tokenizer{input, 0}
-
+	var result []token.Token
 	for {
-		var t token.Token
-		t, err = ter.NextToken()
+		t, err := ter.NextToken()
 		if err != nil {
-			return
+			return []token.Token{}, fmt.Errorf("cant parse next token %v", err)
 		}
 		if t.Type == token.EofType {
 			break
 		}
 		result = append(result, t)
 	}
-	return
+	return result, nil
 }

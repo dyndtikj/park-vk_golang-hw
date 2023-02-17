@@ -1,10 +1,14 @@
 package calculator
 
 import (
-	"errors"
+	"fmt"
 	"homework/hw1_part2/calculator/parser"
 	"homework/hw1_part2/calculator/rpn"
 	"homework/hw1_part2/calculator/token"
+)
+
+var (
+	ErrWrongParentheses = fmt.Errorf("wrong parentheses")
 )
 
 func checkExpression(input string) error {
@@ -16,33 +20,33 @@ func checkExpression(input string) error {
 			counter--
 		}
 		if counter < 0 {
-			return errors.New("wrong parentheses")
+			return ErrWrongParentheses
 		}
 	}
 	if counter != 0 {
-		return errors.New("wrong parentheses")
+		return ErrWrongParentheses
 	}
 	return nil
 }
 
-func Calculate(input string) (result float64, err error) {
-	err = checkExpression(input)
+func Calculate(input string) (float64, error) {
+	err := checkExpression(input)
 	if err != nil {
-		return
+		return 0, fmt.Errorf("failed to check expression %w", err)
 	}
 
 	tokens, err := parser.Parse(input)
 	if err != nil {
-		return
+		return 0, fmt.Errorf("failed to parse expression %w", err)
 	}
 
 	rpnTokens, err := rpn.CreateRPN(tokens)
 	if err != nil {
-		return
+		return 0, fmt.Errorf("failed to create RPN %w", err)
 	}
-	result, err = rpn.EvaluateRpn(rpnTokens)
+	result, err := rpn.EvaluateRpn(rpnTokens)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to evaluste RPN %w", err)
 	}
-	return
+	return result, nil
 }

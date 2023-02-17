@@ -2,8 +2,13 @@ package uniq
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
+)
+
+var (
+	ErrInvalidArgs = fmt.Errorf("invalid arguments")
 )
 
 type Options struct {
@@ -46,19 +51,19 @@ func (o Options) IsValid() bool {
 }
 
 // Функция применяет опции к строке, не меняя ее, возвращает копию
-func useOptions(line string, options Options) (result string, err error) {
-	result = line
+func useOptions(line string, options Options) (string, error) {
+	result := line
 	if options.IgnoreFields > 0 {
 		str := strings.Split(result, " ")
 		if len(str) < options.IgnoreFields {
-			return result, errors.New("Str:\"" + line + "\" dont have " +
+			return "", errors.New("Str:\"" + line + "\" dont have " +
 				strconv.Itoa(options.IgnoreFields) + " fields")
 		}
 		result = strings.Join(str[options.IgnoreFields:], " ")
 	}
 	if options.IgnoreChars > 0 {
 		if options.IgnoreChars > len(result) {
-			return result, errors.New("Str:" + line + "dont have " +
+			return "", errors.New("Str:" + line + "dont have " +
 				strconv.Itoa(options.IgnoreChars) + "letters to ignore")
 		}
 		if options.IgnoreFields > 0 {
@@ -72,19 +77,19 @@ func useOptions(line string, options Options) (result string, err error) {
 	if options.IgnoreRegister {
 		result = strings.ToLower(result)
 	}
-	return
+	return result, nil
 }
 
-func createLines(options Options, input []string) (result []line, err error) {
+func createLines(options Options, input []string) ([]line, error) {
+	var result []line
 	for _, str := range input {
-		var modified string
-		modified, err = useOptions(str, options)
+		modified, err := useOptions(str, options)
 		if err != nil {
-			return
+			return []line{}, fmt.Errorf("failed to use options %w", err)
 		}
 		result = append(result, line{str, modified})
 	}
-	return
+	return result, nil
 }
 
 func findReplicates(input []line) []repLine {
@@ -102,13 +107,14 @@ func findReplicates(input []line) []repLine {
 	return dupLines
 }
 
-func Uniq(options Options, input []string) (result []string, err error) {
+func Uniq(options Options, input []string) ([]string, error) {
+	var result []string
 	if !options.IsValid() {
-		return result, errors.New("invalid arguments")
+		return []string{}, ErrInvalidArgs
 	}
 	lines, err := createLines(options, input)
 	if err != nil {
-		return
+		return []string{}, fmt.Errorf("failed to create lines %w", err)
 	}
 	repLines := findReplicates(lines)
 	for _, repLine := range repLines {

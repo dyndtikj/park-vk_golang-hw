@@ -34,31 +34,38 @@ func parseCmd() (options uniq.Options, ioSet ioSettings) {
 	return
 }
 
-func readData(settings ioSettings) (lines []string, err error) {
+func readData(settings ioSettings) ([]string, error) {
 	file := os.Stdin
 	if len(settings.input) > 0 {
-		file, err = os.Open(settings.input)
+		file, err := os.Open(settings.input)
 		if err != nil {
-			return
+			return []string{}, fmt.Errorf("failed to open file %w", err)
 		}
 		defer func(file *os.File) {
 			err = file.Close()
 			if err != nil {
-				return
+				log.Fatal(err)
 			}
 		}(file)
 	}
-	lines, err = readLines(file)
-	return
+	lines, err := readLines(file)
+	if err != nil {
+		return []string{}, fmt.Errorf("failed read lines from file %w", err)
+	}
+	return lines, err
 }
 
-func readLines(reader io.Reader) (result []string, err error) {
+func readLines(reader io.Reader) ([]string, error) {
+	var result []string
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
 		result = append(result, scanner.Text())
 	}
-	err = scanner.Err()
-	return
+	err := scanner.Err()
+	if err != nil {
+		return []string{}, fmt.Errorf("failed to scan lines %w", err)
+	}
+	return result, nil
 }
 
 func writeData(settings ioSettings, data []string) (err error) {
@@ -66,11 +73,11 @@ func writeData(settings ioSettings, data []string) (err error) {
 	if len(settings.output) > 0 {
 		file, err = os.Create(settings.output)
 		if err != nil {
-			return
+			return fmt.Errorf("failed to create file %w", err)
 		}
 		defer func(file *os.File) {
 			if err = file.Close(); err != nil {
-				return
+				log.Fatal(err)
 			}
 		}(file)
 	}
@@ -92,15 +99,18 @@ func main() {
 
 	lines, err := readData(settings)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("failed to read data %s\n", err)
+		return
 	}
 	output, err := uniq.Uniq(opts, lines)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("failed to use uniq utility %s\n", err)
+		return
 	}
 	err = writeData(settings, output)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("failed to write data %s\n", err)
+		return
 	}
 	return
 }

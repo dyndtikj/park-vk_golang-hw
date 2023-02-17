@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"errors"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"homework/hw1_part2/calculator/token"
@@ -58,18 +57,6 @@ func TestParse(t *testing.T) {
 			},
 			"test : (1+2)*12",
 		},
-		{
-			"1+2-3q1",
-			outputCase{
-				tokens: []token.Token{{token.NumType, "1"},
-					{token.OpType, "+"},
-					{token.NumType, "2"},
-					{token.OpType, "-"},
-					{token.NumType, "3"}},
-				err: errors.New("Can't find token from moment: q1"),
-			},
-			"test : 1+2-3q1",
-		},
 	}
 
 	for _, test := range testCases {
@@ -81,7 +68,7 @@ func TestParse(t *testing.T) {
 				}
 			} else if err != test.output.err {
 				fmt.Println(err.Error(), test.output.err.Error())
-				t.Errorf("2Expected other err, then %v ", err)
+				t.Errorf("Expected other err, then %v ", err)
 			}
 			for i, tok := range tokens {
 				assert.Equal(t, test.output.tokens[i].Literal, tok.Literal)

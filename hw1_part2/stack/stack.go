@@ -31,12 +31,12 @@ func (st *Stack[T]) Push(node T) {
 	st.nodes = append(st.nodes, node)
 }
 
-func (st *Stack[T]) Pop() (top T, ok bool) {
-	top, ok = st.Peek()
+func (st *Stack[T]) Pop() (T, bool) {
+	top, ok := st.Peek()
 	if ok {
 		st.nodes = st.nodes[:st.Len()-1]
 	}
-	return
+	return top, ok
 }
 
 func (st *Stack[T]) Values() []T {
