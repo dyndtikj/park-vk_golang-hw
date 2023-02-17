@@ -42,7 +42,7 @@ jobs:
       # Run testing on the code
       - name: Run testing
         run: |
-          go get ./...
+          go get -t homework/hw1_part1/uniq
           cd hw1_part1/
           go test -v ./...
 
@@ -78,6 +78,6 @@ jobs:
       # Run testing on the code
       - name: Run testing
         run: |
-          go get ./...
+          go get -t homework/hw1_part2/calculator
           cd hw1_part2/
           go test -v ./...
