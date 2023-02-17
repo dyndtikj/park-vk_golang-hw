@@ -42,6 +42,7 @@ jobs:
       # Run testing on the code
       - name: Run testing
         run: |
+          go get ./...
           cd hw1_part1/
           go test -v ./...
 
@@ -77,5 +78,6 @@ jobs:
       # Run testing on the code
       - name: Run testing
         run: |
+          go get ./...
           cd hw1_part2/
           go test -v ./...
