@@ -43,8 +43,6 @@ func SelectUsers(in, out chan interface{}) {
 		go func() {
 			user := <-usrChan
 			if _, ok := set.Load(user.Email); !ok {
-				//fmt.Println("GOT ", user.Email)
-				//fmt.Println(set)
 				set.Store(user.Email, true)
 				out <- user
 			}
@@ -54,22 +52,32 @@ func SelectUsers(in, out chan interface{}) {
 	wg.Wait()
 }
 
+func GetMsgWorker(butchUsr []User, out chan interface{}) {
+	messages, err := GetMessages(butchUsr...)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, msg := range messages {
+		out <- msg
+	}
+}
+
 func SelectMessages(in, out chan interface{}) {
-	// TODO batches
+	butchUsr := make([]User, 0, GetMessagesMaxUsersBatch)
 	for val := range in {
 		usr := val.(User)
-		messages, err := GetMessages(usr)
-		if err != nil {
-			log.Fatal(err)
+		butchUsr = append(butchUsr, usr)
+		if len(butchUsr) == GetMessagesMaxUsersBatch {
+			GetMsgWorker(butchUsr, out)
+			butchUsr = butchUsr[:0]
 		}
-		for _, msg := range messages {
-			out <- msg
-		}
+	}
+	if len(butchUsr) > 0 {
+		GetMsgWorker(butchUsr, out)
 	}
 }
 
 func CheckSpam(in, out chan interface{}) {
-	// TODO antibrut
 	for val := range in {
 		msgId := val.(MsgID)
 		has, err := HasSpam(msgId)
