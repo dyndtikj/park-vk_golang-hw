@@ -28,15 +28,30 @@ func RunPipeline(cmds ...cmd) {
 }
 
 func SelectUsers(in, out chan interface{}) {
-	set := make(map[string]bool)
+	set := sync.Map{}
+	wg := sync.WaitGroup{}
 	for val := range in {
 		email := val.(string)
-		user := GetUser(email)
-		if _, ok := set[user.Email]; !ok {
-			out <- user
-			set[user.Email] = true
-		}
+		usrChan := make(chan User)
+
+		go func(email string, out chan User) {
+			out <- GetUser(email)
+			close(out)
+		}(email, usrChan)
+
+		wg.Add(1)
+		go func() {
+			user := <-usrChan
+			if _, ok := set.Load(user.Email); !ok {
+				//fmt.Println("GOT ", user.Email)
+				//fmt.Println(set)
+				set.Store(user.Email, true)
+				out <- user
+			}
+			wg.Done()
+		}()
 	}
+	wg.Wait()
 }
 
 func SelectMessages(in, out chan interface{}) {
