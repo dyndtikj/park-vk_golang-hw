@@ -42,7 +42,6 @@ jobs:
       # Run testing on the code
       - name: Run testing
         run: |
-          go get -t homework/hw1_part1/uniq
           cd hw1_part1/
           go test -v ./...
 
@@ -78,6 +77,22 @@ jobs:
       # Run testing on the code
       - name: Run testing
         run: |
-          go get -t homework/hw1_part2/calculator
           cd hw1_part2/
+          go test -v ./...
+
+  tests_hw2:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.20.0'
+
+      # Run testing on the code
+      - name: Run testing
+        run: |
+          cd hw2/
           go test -v ./...

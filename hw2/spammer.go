@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strconv"
 	"sync"
+	"sync/atomic"
 )
 
 func RunPipeline(cmds ...cmd) {
@@ -36,7 +37,6 @@ func SelectUsers(in, out chan interface{}) {
 
 		go func(email string, out chan User) {
 			out <- GetUser(email)
-			close(out)
 		}(email, usrChan)
 
 		wg.Add(1)
@@ -52,7 +52,8 @@ func SelectUsers(in, out chan interface{}) {
 	wg.Wait()
 }
 
-func GetMsgWorker(butchUsr []User, out chan interface{}) {
+func GetMsgWorker(butchUsr []User, out chan interface{}, wg *sync.WaitGroup) {
+	defer wg.Done()
 	messages, err := GetMessages(butchUsr...)
 	if err != nil {
 		log.Fatal(err)
@@ -64,31 +65,60 @@ func GetMsgWorker(butchUsr []User, out chan interface{}) {
 
 func SelectMessages(in, out chan interface{}) {
 	butchUsr := make([]User, 0, GetMessagesMaxUsersBatch)
+	wg := sync.WaitGroup{}
 	for val := range in {
 		usr := val.(User)
 		butchUsr = append(butchUsr, usr)
 		if len(butchUsr) == GetMessagesMaxUsersBatch {
-			GetMsgWorker(butchUsr, out)
+			wg.Add(1)
+			res := make([]User, len(butchUsr))
+			copy(res, butchUsr)
+			go GetMsgWorker(res, out, &wg)
 			butchUsr = butchUsr[:0]
 		}
 	}
 	if len(butchUsr) > 0 {
-		GetMsgWorker(butchUsr, out)
+		wg.Add(1)
+		go GetMsgWorker(butchUsr, out, &wg)
 	}
+	wg.Wait()
+}
+
+var checkSpamCounter int32
+var mutex sync.Mutex
+
+func checkBrut() bool {
+	mutex.Lock()
+	b := checkSpamCounter < int32(HasSpamMaxAsyncRequests)
+	mutex.Unlock()
+	return b
 }
 
 func CheckSpam(in, out chan interface{}) {
+	wg := sync.WaitGroup{}
 	for val := range in {
 		msgId := val.(MsgID)
-		has, err := HasSpam(msgId)
-		if err != nil {
-			log.Fatal(err)
-		}
-		out <- MsgData{
-			ID:      msgId,
-			HasSpam: has,
+		for {
+			if checkBrut() {
+				atomic.AddInt32(&checkSpamCounter, 1)
+				wg.Add(1)
+				go func(id MsgID) {
+					has, err := HasSpam(id)
+					if err != nil {
+						log.Fatal(err)
+					}
+					out <- MsgData{
+						ID:      msgId,
+						HasSpam: has,
+					}
+					atomic.AddInt32(&checkSpamCounter, -1)
+					wg.Done()
+				}(msgId)
+				break
+			}
 		}
 	}
+	wg.Wait()
 }
 
 func CombineResults(in, out chan interface{}) {
