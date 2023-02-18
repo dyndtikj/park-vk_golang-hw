@@ -4,7 +4,6 @@ import (
 	"log"
 	"sort"
 	"strconv"
-	"strings"
 	"sync"
 )
 
@@ -29,60 +28,61 @@ func RunPipeline(cmds ...cmd) {
 }
 
 func SelectUsers(in, out chan interface{}) {
+	set := make(map[string]bool)
 	for val := range in {
 		email := val.(string)
-		out <- GetUser(email)
+		user := GetUser(email)
+		if _, ok := set[user.Email]; !ok {
+			out <- user
+			set[user.Email] = true
+		}
 	}
 }
 
 func SelectMessages(in, out chan interface{}) {
-	// TODO batches , and unique users
+	// TODO batches
 	for val := range in {
 		usr := val.(User)
-		msg, err := GetMessages(usr)
+		messages, err := GetMessages(usr)
 		if err != nil {
 			log.Fatal(err)
 		}
-		out <- msg
+		for _, msg := range messages {
+			out <- msg
+		}
 	}
 }
 
 func CheckSpam(in, out chan interface{}) {
+	// TODO antibrut
 	for val := range in {
-		msgIds := val.([]MsgID)
-		for _, m := range msgIds {
-			has, err := HasSpam(m)
-			if err != nil {
-				log.Fatal(err)
-			}
-			out <- MsgData{
-				ID:      m,
-				HasSpam: has,
-			}
-
+		msgId := val.(MsgID)
+		has, err := HasSpam(msgId)
+		if err != nil {
+			log.Fatal(err)
+		}
+		out <- MsgData{
+			ID:      msgId,
+			HasSpam: has,
 		}
 	}
 }
 
 func CombineResults(in, out chan interface{}) {
-	var results []string
+	var data []MsgData
 	for val := range in {
-		msgData := val.(MsgData)
-		resStr := strconv.FormatBool(msgData.HasSpam) + strconv.Itoa(int(msgData.ID))
-		results = append(results, resStr)
+		data = append(data, val.(MsgData))
 	}
-
-	sort.Strings(results)
-	separator := 0
-	for idx, str := range results {
-		sl := strings.Split(str, " ")
-		if sl[0] == strconv.FormatBool(true) {
-			separator = idx
-			break
+	sort.Slice(data, func(i, j int) bool {
+		if data[i].HasSpam == data[j].HasSpam {
+			return data[i].ID < data[j].ID
 		}
-	}
-	result := results[separator:]
-	result = append(result, results[:separator]...)
+		// i < j
+		return data[i].HasSpam && !data[j].HasSpam
+	})
 
-	out <- strings.Join(results, "\n")
+	for _, msg := range data {
+		resStr := strconv.FormatBool(msg.HasSpam) + " " + strconv.FormatUint(uint64(msg.ID), 10)
+		out <- resStr
+	}
 }
