@@ -84,25 +84,16 @@ func SelectMessages(in, out chan interface{}) {
 	wg.Wait()
 }
 
-var checkSpamCounter int32
-var mutex sync.Mutex
-
-func checkBrut() bool {
-	mutex.Lock()
-	b := checkSpamCounter < int32(HasSpamMaxAsyncRequests)
-	mutex.Unlock()
-	return b
-}
-
 func CheckSpam(in, out chan interface{}) {
 	wg := sync.WaitGroup{}
+	var checkSpamCounter int32
 	for val := range in {
 		msgId := val.(MsgID)
 		for {
-			if checkBrut() {
+			if checkSpamCounter < int32(HasSpamMaxAsyncRequests) {
 				atomic.AddInt32(&checkSpamCounter, 1)
 				wg.Add(1)
-				go func(id MsgID) {
+				go func(id MsgID, counter *int32) {
 					has, err := HasSpam(id)
 					if err != nil {
 						log.Fatal(err)
@@ -111,9 +102,9 @@ func CheckSpam(in, out chan interface{}) {
 						ID:      msgId,
 						HasSpam: has,
 					}
-					atomic.AddInt32(&checkSpamCounter, -1)
+					atomic.AddInt32(counter, -1)
 					wg.Done()
-				}(msgId)
+				}(msgId, &checkSpamCounter)
 				break
 			}
 		}

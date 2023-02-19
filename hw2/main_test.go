@@ -117,7 +117,7 @@ func newCollectStrings(strs *[]string) func(in, out chan interface{}) {
 // проверяем, что SelectUsers корректно обрабатывает алиасы и не повторяет одних и тех же юзеров
 func TestAlias(t *testing.T) {
 	inputData := []string{
-		"batman@mail.ru", //is an alias for bruce.wayne@mail.ru
+		"batman@mail.ru", // is an alias for bruce.wayne@mail.ru
 		"bruce.wayne@mail.ru",
 	}
 	expectedOutput := []string{
@@ -136,7 +136,7 @@ func TestAlias(t *testing.T) {
 		"итоговый результат отличается от ожидаемого")
 }
 
-// проверяем, что запуски функций SelectUsers,SelectMessages,CheckSpam в параллельных RunPipeline не влияют друг на друга
+// проверяем, что запуски функций SelectUsers,SelectMessages в параллельных RunPipeline не влияют друг на друга
 func TestParallelPiplines(t *testing.T) {
 	inputData := []string{
 		"1000@mail.ru",
@@ -156,9 +156,8 @@ func TestParallelPiplines(t *testing.T) {
 			cmd(newCatStrings(inputData, 150*time.Millisecond)),
 			cmd(SelectUsers),
 			cmd(SelectMessages),
-			cmd(CheckSpam),
 			cmd(func(in, out chan interface{}) {
-				for _ = range in {
+				for range in {
 					cntFirst++
 				}
 			}),
@@ -170,9 +169,8 @@ func TestParallelPiplines(t *testing.T) {
 		cmd(newCatStrings(inputData, 100*time.Millisecond)),
 		cmd(SelectUsers),
 		cmd(SelectMessages),
-		cmd(CheckSpam),
 		cmd(func(in, out chan interface{}) {
-			for _ = range in {
+			for range in {
 				cntSecond++
 			}
 		}),
@@ -195,10 +193,10 @@ func TestTotal(t *testing.T) {
 		"d.vader@mail.ru",
 		"noname@mail.ru",
 		"e.musk@mail.ru",
-		"spiderman@mail.ru", //is an alias for peter.parker@mail.ru
+		"spiderman@mail.ru", // is an alias for peter.parker@mail.ru
 		"red_prince@mail.ru",
 		"tomasangelo@mail.ru",
-		"batman@mail.ru", //is an alias for bruce.wayne@mail.ru
+		"batman@mail.ru", // is an alias for bruce.wayne@mail.ru
 		"bruce.wayne@mail.ru",
 	}
 	expectedOutput := []string{
