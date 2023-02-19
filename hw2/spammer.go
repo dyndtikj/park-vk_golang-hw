@@ -17,8 +17,8 @@ func RunPipeline(cmds ...cmd) {
 		out := make(chan interface{})
 
 		go func(c cmd, in, out chan interface{}) {
+			defer wg.Done()
 			c(in, out)
-			wg.Done()
 			close(out)
 		}(c, in, out)
 
@@ -41,12 +41,12 @@ func SelectUsers(in, out chan interface{}) {
 
 		wg.Add(1)
 		go func() {
+			defer wg.Done()
 			user := <-usrChan
 			if _, ok := set.Load(user.Email); !ok {
 				set.Store(user.Email, true)
 				out <- user
 			}
-			wg.Done()
 		}()
 	}
 	wg.Wait()
@@ -94,6 +94,8 @@ func CheckSpam(in, out chan interface{}) {
 				atomic.AddInt32(&checkSpamCounter, 1)
 				wg.Add(1)
 				go func(id MsgID, counter *int32) {
+					defer wg.Done()
+					defer atomic.AddInt32(counter, -1)
 					has, err := HasSpam(id)
 					if err != nil {
 						log.Fatal(err)
@@ -102,8 +104,6 @@ func CheckSpam(in, out chan interface{}) {
 						ID:      msgId,
 						HasSpam: has,
 					}
-					atomic.AddInt32(counter, -1)
-					wg.Done()
 				}(msgId, &checkSpamCounter)
 				break
 			}
