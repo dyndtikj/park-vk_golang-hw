@@ -34,10 +34,11 @@ func parseCmd() (options uniq.Options, ioSet ioSettings) {
 	return
 }
 
-func readData(settings ioSettings) (lines []string, err error) {
+func readData(settings ioSettings) ([]string, error) {
 	file := os.Stdin
+	var err error
 	if len(settings.input) > 0 {
-		file, err := os.Open(settings.input)
+		file, err = os.Open(settings.input)
 		if err != nil {
 			return nil, fmt.Errorf("failed to open file %w", err)
 		}
@@ -48,7 +49,7 @@ func readData(settings ioSettings) (lines []string, err error) {
 			}
 		}(file)
 	}
-	lines, err = readLines(file)
+	lines, err := readLines(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed read lines from file %w", err)
 	}
