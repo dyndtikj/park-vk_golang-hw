@@ -1,6 +1,7 @@
 package calculator
 
 import (
+	"errors"
 	"fmt"
 	"homework/hw1_part2/calculator/parser"
 	"homework/hw1_part2/calculator/rpn"
@@ -8,7 +9,7 @@ import (
 )
 
 var (
-	ErrWrongParentheses = fmt.Errorf("wrong parentheses")
+	ErrWrongParentheses = errors.New("wrong parentheses")
 )
 
 func checkExpression(input string) error {
@@ -30,8 +31,7 @@ func checkExpression(input string) error {
 }
 
 func Calculate(input string) (float64, error) {
-	err := checkExpression(input)
-	if err != nil {
+	if err := checkExpression(input); err != nil {
 		return 0, fmt.Errorf("failed to check expression %w", err)
 	}
 

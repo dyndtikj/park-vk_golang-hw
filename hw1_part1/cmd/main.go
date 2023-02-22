@@ -34,23 +34,23 @@ func parseCmd() (options uniq.Options, ioSet ioSettings) {
 	return
 }
 
-func readData(settings ioSettings) ([]string, error) {
+func readData(settings ioSettings) (lines []string, err error) {
 	file := os.Stdin
 	if len(settings.input) > 0 {
 		file, err := os.Open(settings.input)
 		if err != nil {
-			return []string{}, fmt.Errorf("failed to open file %w", err)
+			return nil, fmt.Errorf("failed to open file %w", err)
 		}
 		defer func(file *os.File) {
-			err = file.Close()
-			if err != nil {
-				log.Fatal(err)
+			e := file.Close()
+			if err == nil {
+				err = fmt.Errorf("failed to close file %w", e)
 			}
 		}(file)
 	}
-	lines, err := readLines(file)
+	lines, err = readLines(file)
 	if err != nil {
-		return []string{}, fmt.Errorf("failed read lines from file %w", err)
+		return nil, fmt.Errorf("failed read lines from file %w", err)
 	}
 	return lines, err
 }
@@ -61,9 +61,8 @@ func readLines(reader io.Reader) ([]string, error) {
 	for scanner.Scan() {
 		result = append(result, scanner.Text())
 	}
-	err := scanner.Err()
-	if err != nil {
-		return []string{}, fmt.Errorf("failed to scan lines %w", err)
+	if err := scanner.Err(); err != nil {
+		return nil, fmt.Errorf("failed to scan lines %w", err)
 	}
 	return result, nil
 }
@@ -92,8 +91,7 @@ func writeData(settings ioSettings, data []string) (err error) {
 func main() {
 	opts, settings := parseCmd()
 	if !opts.IsValid() {
-		fmt.Println("invalid arguments, usage:")
-		fmt.Println(correctOpts)
+		fmt.Printf("invalid arguments, usage:\n%s", correctOpts)
 		return
 	}
 
@@ -102,13 +100,14 @@ func main() {
 		fmt.Printf("failed to read data %s\n", err)
 		return
 	}
+
 	output, err := uniq.Uniq(opts, lines)
 	if err != nil {
 		fmt.Printf("failed to use uniq utility %s\n", err)
 		return
 	}
-	err = writeData(settings, output)
-	if err != nil {
+
+	if err = writeData(settings, output); err != nil {
 		fmt.Printf("failed to write data %s\n", err)
 		return
 	}

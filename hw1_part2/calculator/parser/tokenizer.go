@@ -40,7 +40,7 @@ func (t *Tokenizer) NextToken() (token.Token, error) {
 
 			return token.Token{Type: token.NumType, Literal: number}, nil
 		}
-		return token.Token{}, errors.New("Can't find token from moment: " + t.input[t.cursor:])
+		return token.Token{}, errors.New("can't find token from moment: " + t.input[t.cursor:])
 	}
 }
 

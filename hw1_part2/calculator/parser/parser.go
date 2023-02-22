@@ -11,7 +11,7 @@ func Parse(input string) ([]token.Token, error) {
 	for {
 		t, err := ter.NextToken()
 		if err != nil {
-			return []token.Token{}, fmt.Errorf("cant parse next token %v", err)
+			return []token.Token{}, fmt.Errorf("cant parse next token %w", err)
 		}
 		if t.Type == token.EofType {
 			break
